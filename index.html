@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ChemLab · Chemistry Tuition Portal</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#0f1630; --panel:#141c38; --panel2:#1a2444;
+    --line:#26325c; --line2:#33427a;
+    --txt:#e8ecfb; --muted:#9aa6cf; --faint:#6b78a6;
+    --brand:#3dd4c9; --brand2:#7c6cff; --amber:#ffb454; --pink:#ff6fae; --green:#4ade80; --red:#ff6b6b;
+    --ring:rgba(61,212,201,.35);
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    --r:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    background:
+      radial-gradient(1100px 700px at 85% -10%, rgba(124,108,255,.18), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(61,212,201,.14), transparent 55%),
+      var(--bg);
+    color:var(--txt);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--brand)}
+  ::selection{background:rgba(124,108,255,.4)}
+
+  /* ---------- LOGIN ---------- */
+  #login{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:50;
+  }
+  .login-card{
+    width:100%;max-width:420px;background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);border-radius:22px;padding:34px 30px;box-shadow:var(--shadow);
+  }
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .logo{
+    width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex:none;
+    background:linear-gradient(140deg,var(--brand),var(--brand2));color:#04121a;font-weight:900;font-size:22px;
+    box-shadow:0 8px 24px -8px var(--brand);
+  }
+  .brand h1{font-size:20px;margin:0;letter-spacing:.3px}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+  .login-card h2{font-size:22px;margin:6px 0 4px}
+  .login-card .sub{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+  label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 7px;font-weight:600}
+  .field{
+    width:100%;padding:12px 14px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);
+    color:var(--txt);font-size:14.5px;outline:none;transition:.15s;
+  }
+  .field:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--ring)}
+  .row2{display:flex;gap:12px}
+  .row2>div{flex:1}
+  select.field{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 18px,calc(100% - 13px) 18px;background-size:5px 5px;background-repeat:no-repeat}
+  .btn{
+    width:100%;margin-top:20px;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:700;
+    background:linear-gradient(120deg,var(--brand),var(--brand2));color:#05131b;transition:.15s;
+  }
+  .btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--txt)}
+  .login-foot{text-align:center;margin-top:16px;font-size:12px;color:var(--faint)}
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;min-height:100vh}
+  #app.on{display:grid;grid-template-columns:250px 1fr}
+
+  .side{
+    background:linear-gradient(180deg,var(--bg2),transparent);border-right:1px solid var(--line);
+    padding:20px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;
+  }
+  .side .brand{margin-bottom:18px}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;color:var(--muted);
+    font-size:14px;font-weight:600;border:1px solid transparent;transition:.13s;background:none;width:100%;text-align:left;
+  }
+  .nav-item .ico{width:20px;text-align:center;font-size:15px}
+  .nav-item:hover{background:var(--panel);color:var(--txt)}
+  .nav-item.active{background:var(--panel2);color:var(--txt);border-color:var(--line2)}
+  .nav-item.active .ico{filter:drop-shadow(0 0 8px var(--brand))}
+  .side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}
+  .who{display:flex;align-items:center;gap:11px}
+  .avatar{width:38px;height:38px;border-radius:11px;background:linear-gradient(140deg,var(--pink),var(--brand2));display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+  .who b{font-size:13.5px;display:block}
+  .who span{font-size:11.5px;color:var(--faint)}
+  .logout{margin-top:11px;font-size:12.5px;color:var(--faint);background:none;border:none;padding:4px 0}
+  .logout:hover{color:var(--red)}
+
+  .main{padding:26px 32px 60px;max-width:1100px}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+  .topbar h2{margin:0;font-size:24px;letter-spacing:.2px}
+  .topbar p{margin:5px 0 0;color:var(--muted);font-size:13.5px}
+  .pill{padding:7px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  .pill b{color:var(--amber)}
+
+  .cards{display:grid;gap:16px}
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  .grid2{grid-template-columns:repeat(2,1fr)}
+  .grid4{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);
+    padding:18px;transition:.15s;
+  }
+  .card.hover:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .card h3{margin:0 0 4px;font-size:15.5px}
+  .card .lead{font-size:28px;font-weight:800;letter-spacing:.5px}
+  .card .cap{font-size:12px;color:var(--faint);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+  .muted{color:var(--muted)}
+  .sect-title{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--faint);font-weight:800;margin:26px 0 12px}
+
+  /* progress ring */
+  .ring{--p:0;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;margin:0 auto;
+    background:conic-gradient(var(--brand) calc(var(--p)*1%), var(--line) 0);position:relative}
+  .ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--bg2)}
+  .ring span{position:relative;font-size:23px;font-weight:800}
+
+  /* topic / lesson cards */
+  .topic{cursor:pointer;position:relative;overflow:hidden}
+  .topic .tag{position:absolute;top:14px;right:14px;font-size:11px;padding:4px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted)}
+  .topic .emoji{font-size:26px}
+  .topic .bar{height:7px;border-radius:99px;background:var(--line);margin-top:14px;overflow:hidden}
+  .topic .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:99px}
+  .topic small{color:var(--faint);font-size:11.5px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chip{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+  .badge-done{color:var(--green)}
+  .badge-todo{color:var(--amber)}
+
+  /* lesson reader */
+  .reader{max-width:760px}
+  .reader h3{font-size:22px;margin:0 0 6px}
+  .reader h4{font-size:16px;margin:26px 0 8px;color:var(--brand)}
+  .reader p{line-height:1.7;color:var(--txt);font-size:14.5px;margin:10px 0}
+  .reader ul{line-height:1.75;color:var(--muted);font-size:14.5px}
+  .reader .keybox{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:12px;padding:14px 16px;margin:18px 0}
+  .reader .keybox b{color:var(--amber)}
+  .eq{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-family:"Cascadia Code",Consolas,monospace;font-size:14px;color:var(--brand);display:inline-block;margin:4px 0}
+  .back{background:none;border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:10px;font-size:13px;margin-bottom:18px}
+  .back:hover{color:var(--txt);border-color:var(--line2)}
+
+  /* quiz */
+  .q{margin:0 0 14px}
+  .q .stem{font-size:15px;font-weight:600;margin-bottom:12px;line-height:1.5}
+  .opt{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--bg2);margin-bottom:9px;font-size:14px;transition:.12s}
+  .opt:hover{border-color:var(--line2)}
+  .opt.sel{border-color:var(--brand);box-shadow:0 0 0 3px var(--ring)}
+  .opt.correct{border-color:var(--green);background:rgba(74,222,128,.09)}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.09)}
+  .opt .k{width:26px;height:26px;border-radius:8px;background:var(--panel2);display:grid;place-items:center;font-size:12.5px;font-weight:700;flex:none}
+  .quiz-result{text-align:center;padding:26px}
+  .quiz-result .big{font-size:52px;font-weight:900;background:linear-gradient(120deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* periodic table */
+  .ptable-wrap{overflow-x:auto;padding-bottom:8px}
+  .ptable{display:grid;grid-template-columns:repeat(18,minmax(46px,1fr));gap:4px;min-width:880px}
+  .el{aspect-ratio:1;border-radius:8px;border:1px solid var(--line);background:var(--panel);padding:4px 5px;cursor:pointer;position:relative;transition:.1s;display:flex;flex-direction:column;justify-content:space-between}
+  .el:hover{transform:scale(1.12);z-index:5;border-color:#fff;box-shadow:var(--shadow)}
+  .el .no{font-size:9px;color:var(--faint)}
+  .el .sym{font-size:16px;font-weight:800;line-height:1}
+  .el .nm{font-size:7px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .el.nonmetal{background:#173a34}.el.noble{background:#2a2350}.el.alkali{background:#3a1d1d}
+  .el.alkaline{background:#3a2a17}.el.metalloid{background:#173047}.el.halogen{background:#1d3a2c}
+  .el.transition{background:#252b46}.el.postt{background:#24304a}.el.lan{background:#331d3a}.el.act{background:#3a1d2e}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(4,7,18,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .modal-bg.on{display:flex}
+  .modal{width:100%;max-width:360px;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line2);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+  .modal .elhead{display:flex;justify-content:space-between;align-items:flex-start}
+  .modal .big-sym{font-size:46px;font-weight:900;line-height:1}
+  .modal .close{background:none;border:none;color:var(--muted);font-size:22px;line-height:1}
+  .modal .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .modal .kv span{color:var(--muted)}
+  .modal .kv b{font-weight:700}
+
+  /* resources */
+  .res{display:flex;align-items:center;gap:14px}
+  .res .ic{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;font-size:20px;flex:none;background:var(--panel2)}
+  .res b{font-size:14.5px}
+  .res small{color:var(--faint);font-size:12px}
+  .dl{margin-left:auto;font-size:12.5px;padding:7px 13px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt)}
+  .dl:hover{border-color:var(--brand);color:var(--brand)}
+
+  /* schedule */
+  .lesson-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .lesson-row:last-child{border:none}
+  .when{width:74px;flex:none;text-align:center}
+  .when b{display:block;font-size:17px}
+  .when small{color:var(--faint);font-size:11px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none;box-shadow:0 0 10px var(--brand)}
+
+  /* progress bars in progress view */
+  .pbar{height:9px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:7px}
+  .pbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+
+  .empty{color:var(--faint);font-size:13.5px;padding:8px 0}
+  .view{display:none}
+  .view.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* mobile */
+  .menu-btn{display:none}
+  @media(max-width:860px){
+    #app.on{grid-template-columns:1fr}
+    .side{position:fixed;left:-260px;top:0;z-index:40;width:250px;transition:.25s;box-shadow:var(--shadow)}
+    .side.open{left:0}
+    .menu-btn{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:var(--panel);border:1px solid var(--line);color:var(--txt);font-size:19px}
+    .main{padding:18px 16px 60px}
+    .grid3,.grid4{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr}
+    .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;display:none}
+    .scrim.on{display:block}
+  }
+  @media(max-width:560px){.grid4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo">Ch</div>
+      <div><h1>ChemLab</h1><p>Chemistry Tuition · Student Portal</p></div>
+    </div>
+    <h2>Welcome back 👋</h2>
+    <p class="sub">Sign in to continue your chemistry journey.</p>
+
+    <label>Full name</label>
+    <input id="in-name" class="field" placeholder="e.g. Amara Perera" />
+
+    <div class="row2" style="margin-top:16px">
+      <div>
+        <label>Grade / Level</label>
+        <select id="in-level" class="field">
+          <option>O-Level (Grade 10-11)</option>
+          <option>A-Level (Grade 12-13)</option>
+          <option>IGCSE</option>
+          <option>Foundation / Year 1</option>
+        </select>
+      </div>
+      <div>
+        <label>Class code</label>
+        <input id="in-code" class="field" placeholder="CHEM-2026" value="CHEM-2026" />
+      </div>
+    </div>
+
+    <button class="btn" onclick="login()">Enter portal →</button>
+    <p class="login-foot">Demo portal · your progress is saved on this device only</p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="scrim" onclick="toggleMenu(false)"></div>
+  <!-- Sidebar -->
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="logo">Ch</div>
+      <div><h1 style="font-size:17px">ChemLab</h1><p>Student Portal</p></div>
+    </div>
+
+    <button class="nav-item active" data-view="dash"><span class="ico">🏠</span> Dashboard</button>
+    <button class="nav-item" data-view="lessons"><span class="ico">📘</span> Lessons</button>
+    <button class="nav-item" data-view="quiz"><span class="ico">✏️</span> Quizzes</button>
+    <button class="nav-item" data-view="ptable"><span class="ico">⚛️</span> Periodic Table</button>
+    <button class="nav-item" data-view="resources"><span class="ico">📎</span> Resources</button>
+    <button class="nav-item" data-view="progress"><span class="ico">📈</span> My Progress</button>
+
+    <div class="side-foot">
+      <div class="who">
+        <div class="avatar" id="av">A</div>
+        <div><b id="who-name">Student</b><span id="who-level">O-Level</span></div>
+      </div>
+      <button class="logout" onclick="logout()">↪ Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+      <button class="menu-btn" onclick="toggleMenu(true)">☰</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="view on" id="v-dash">
+      <div class="topbar">
+        <div><h2 id="greet">Good day</h2><p>Here's where you left off. Keep the reaction going.</p></div>
+        <div class="pill">🔥 Streak: <b id="streak">1</b> day</div>
+      </div>
+
+      <div class="cards grid3">
+        <div class="card" style="display:flex;gap:16px;align-items:center">
+          <div class="ring" id="ring-lessons"><span>0%</span></div>
+          <div><div class="cap">Course progress</div><div class="muted" style="font-size:13px;margin-top:6px">Lessons completed across all topics</div></div>
+        </div>
+        <div class="card">
+          <div class="cap">Avg quiz score</div>
+          <div class="lead" id="avg-score">—</div>
+          <div class="muted" style="font-size:12.5px" id="quiz-count">No quizzes taken yet</div>
+        </div>
+        <div class="card">
+          <div class="cap">Topics mastered</div>
+          <div class="lead" id="mastered">0<span style="font-size:16px;color:var(--faint)">/6</span></div>
+          <div class="muted" style="font-size:12.5px">A topic is mastered at 100% lessons + 70%+ quiz</div>
+        </div>
+      </div>
+
+      <div class="sect-title">Continue learning</div>
+      <div class="cards grid3" id="continue-cards"></div>
+
+      <div class="sect-title">Upcoming classes</div>
+      <div class="card">
+        <div class="lesson-row"><div class="dot"></div><div class="when"><b>Thu</b><small>4:00 PM</small></div><div><b>Chemical Bonding — Live Q&A</b><div class="muted" style="font-size:12.5px">Ionic vs covalent, dot-and-cross practice</div></div></div>
+        <div class="lesson-row"><div class="dot"></div><div class="when"><b>Sat</b><small>10:00 AM</small></div><div><b>The Mole Concept — Problem Class</b><div class="muted" style="font-size:12.5px">Bring your calculator and past-paper booklet</div></div></div>
+        <div class="lesson-row"><div class="dot" style="background:var(--amber);box-shadow:0 0 10px var(--amber)"></div><div class="when"><b>Mon</b><small>5:30 PM</small></div><div><b>Acids, Bases & Salts — Titration lab</b><div class="muted" style="font-size:12.5px">Virtual titration walkthrough + calculations</div></div></div>
+      </div>
+    </section>
+
+    <!-- LESSONS -->
+    <section class="view" id="v-lessons">
+      <div class="topbar"><div><h2>Lessons</h2><p>Six core topics. Tap a topic to open its lessons.</p></div></div>
+      <div id="topics-list" class="cards grid2"></div>
+      <div id="lesson-detail" style="display:none"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="view" id="v-quiz">
+      <div class="topbar"><div><h2>Quizzes</h2><p>Auto-graded practice. Your best score is saved per topic.</p></div></div>
+      <div id="quiz-list" class="cards grid2"></div>
+      <div id="quiz-run" style="display:none"></div>
+    </section>
+
+    <!-- PERIODIC TABLE -->
+    <section class="view" id="v-ptable">
+      <div class="topbar"><div><h2>Interactive Periodic Table</h2><p>Tap any element to see its key data. Colours group elements by family.</p></div></div>
+      <div class="ptable-wrap"><div class="ptable" id="ptable"></div></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section class="view" id="v-resources">
+      <div class="topbar"><div><h2>Resources</h2><p>Past papers, cheat-sheets and reference material.</p></div></div>
+      <div class="cards" id="res-list"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="view" id="v-progress">
+      <div class="topbar"><div><h2>My Progress</h2><p>Track your mastery topic by topic.</p></div></div>
+      <div class="card"><div id="prog-topics"></div></div>
+      <div class="sect-title">Quiz history</div>
+      <div class="card"><div id="quiz-history"></div></div>
+      <div style="margin-top:20px"><button class="back" onclick="resetProgress()">⟲ Reset all progress</button></div>
+    </section>
+  </main>
+</div>
+
+<!-- element modal -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target.id==='modal-bg')closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+/* =================================================================
+   DATA
+==================================================================*/
+const TOPICS = [
+  {
+    id:"atomic", name:"Atomic Structure", emoji:"⚛️", color:"var(--brand)",
+    blurb:"Protons, neutrons, electrons, isotopes and electron configuration.",
+    lessons:[
+      {t:"Inside the Atom", body:[
+        ["p","Every atom is built from three <b>subatomic particles</b>: protons, neutrons and electrons. Protons and neutrons sit in a tiny, dense <b>nucleus</b>; electrons occupy shells (energy levels) around it."],
+        ["key","<b>Relative charge & mass:</b> proton (+1, mass 1), neutron (0, mass 1), electron (−1, mass ≈ 1/1840)."],
+        ["h","Atomic number & mass number"],
+        ["p","The <b>atomic number (Z)</b> is the number of protons — it defines which element you have. The <b>mass number (A)</b> is protons + neutrons."],
+        ["eq","protons = Z   ·   neutrons = A − Z   ·   electrons = Z (neutral atom)"],
+        ["p","So a sodium atom, ₁₁²³Na, has 11 protons, 11 electrons and 23 − 11 = 12 neutrons."]
+      ]},
+      {t:"Isotopes", body:[
+        ["p","<b>Isotopes</b> are atoms of the same element (same protons) with different numbers of neutrons. They behave identically chemically but have different masses."],
+        ["p","Chlorine exists as ³⁵Cl and ³⁷Cl. The <b>relative atomic mass</b> is the weighted average of all isotopes."],
+        ["eq","Ar = Σ (isotope mass × abundance) / 100"],
+        ["key","Chlorine: (35×75 + 37×25)/100 = <b>35.5</b>. That's why Ar values aren't whole numbers."]
+      ]},
+      {t:"Electron Configuration", body:[
+        ["p","Electrons fill shells from the inside out. The first shell holds up to 2, the second up to 8, the third up to 8 (at this level)."],
+        ["eq","2 , 8 , 8 , ..."],
+        ["p","Sodium (11 electrons) is written <b>2,8,1</b>. The single outer electron explains why sodium is so reactive and forms a 1+ ion."],
+        ["key","Outer-shell (valence) electrons control an element's chemistry and its group in the periodic table."]
+      ]}
+    ]
+  },
+  {
+    id:"bonding", name:"Chemical Bonding", emoji:"🔗", color:"var(--brand2)",
+    blurb:"Ionic, covalent and metallic bonding — and the properties they cause.",
+    lessons:[
+      {t:"Ionic Bonding", body:[
+        ["p","<b>Ionic bonding</b> happens between metals and non-metals. Metal atoms <b>lose</b> electrons to become positive ions; non-metals <b>gain</b> them to become negative ions. Opposite charges attract in a giant lattice."],
+        ["eq","Na → Na⁺ + e⁻      Cl + e⁻ → Cl⁻"],
+        ["key","Ionic compounds have <b>high melting points</b>, are brittle, and conduct electricity only when molten or dissolved."]
+      ]},
+      {t:"Covalent Bonding", body:[
+        ["p","In <b>covalent bonding</b>, non-metal atoms <b>share</b> pairs of electrons so each reaches a full outer shell. A shared pair is a single bond."],
+        ["p","Water (H₂O) has two O–H single bonds; oxygen (O₂) has a double bond; nitrogen (N₂) a triple bond."],
+        ["key","Simple molecular substances have <b>low melting points</b> (weak forces between molecules) and don't conduct electricity."]
+      ]},
+      {t:"Metallic Bonding", body:[
+        ["p","Metals are a lattice of positive ions in a <b>'sea' of delocalised electrons</b>. This explains why metals conduct electricity and heat, and are malleable."],
+        ["key","Delocalised electrons carry charge → good conductors. Layers slide → malleable and ductile."]
+      ]}
+    ]
+  },
+  {
+    id:"mole", name:"The Mole Concept", emoji:"🧮", color:"var(--amber)",
+    blurb:"Moles, Avogadro's number, concentration and stoichiometry.",
+    lessons:[
+      {t:"What is a Mole?", body:[
+        ["p","A <b>mole</b> is simply a count: 6.02 × 10²³ particles (Avogadro's number). It lets us weigh out exact numbers of atoms."],
+        ["eq","moles = mass (g) / molar mass (g mol⁻¹)"],
+        ["key","The molar mass in grams equals the relative formula mass. Water (Mr 18) → 1 mol = 18 g."]
+      ]},
+      {t:"Concentration", body:[
+        ["p","Concentration links moles of solute to volume of solution."],
+        ["eq","concentration (mol dm⁻³) = moles / volume (dm³)"],
+        ["p","Remember 1 dm³ = 1000 cm³, so divide a cm³ volume by 1000 first."],
+        ["key","25.0 cm³ of 0.10 mol dm⁻³ HCl = 0.10 × 0.025 = 0.0025 mol."]
+      ]},
+      {t:"Reacting Masses", body:[
+        ["p","A balanced equation gives the mole ratio. Use it to find unknown masses."],
+        ["eq","1) moles known  2) ×ratio → moles unknown  3) ×Mr → mass"],
+        ["key","Ratios come from the big numbers in the balanced equation, never from the small subscripts."]
+      ]}
+    ]
+  },
+  {
+    id:"acids", name:"Acids, Bases & Salts", emoji:"🧪", color:"var(--pink)",
+    blurb:"pH, neutralisation, salt preparation and titrations.",
+    lessons:[
+      {t:"Acids & Alkalis", body:[
+        ["p","<b>Acids</b> release H⁺ ions in water; <b>alkalis</b> release OH⁻ ions. The <b>pH scale</b> (0–14) measures acidity: below 7 acidic, 7 neutral, above 7 alkaline."],
+        ["key","Strong acids (HCl, H₂SO₄, HNO₃) fully ionise; weak acids (ethanoic) only partly ionise."]
+      ]},
+      {t:"Neutralisation", body:[
+        ["p","Acid + base → salt + water. The core reaction is always:"],
+        ["eq","H⁺(aq) + OH⁻(aq) → H₂O(l)"],
+        ["p","Acid + metal → salt + hydrogen. Acid + carbonate → salt + water + carbon dioxide."],
+        ["key","The salt's name comes from the acid: HCl→chloride, H₂SO₄→sulfate, HNO₃→nitrate."]
+      ]},
+      {t:"Titration", body:[
+        ["p","A <b>titration</b> finds an unknown concentration accurately. Add acid from a burette to a fixed volume of alkali plus indicator until it just changes colour (the end-point)."],
+        ["eq","c₁V₁ / n₁ = c₂V₂ / n₂  (via mole ratio)"],
+        ["key","Repeat until titres agree within 0.10 cm³, then average the concordant results."]
+      ]}
+    ]
+  },
+  {
+    id:"rates", name:"Rates of Reaction", emoji:"⏱️", color:"var(--green)",
+    blurb:"Collision theory and the factors that speed reactions up.",
+    lessons:[
+      {t:"Collision Theory", body:[
+        ["p","Reactions happen when particles <b>collide with enough energy</b> (the activation energy) and the correct orientation. More frequent or more energetic collisions → faster reaction."],
+        ["key","Anything that increases collision frequency or energy increases the rate."]
+      ]},
+      {t:"Factors Affecting Rate", body:[
+        ["p","Rate increases with higher <b>concentration/pressure</b> (more crowded), higher <b>temperature</b> (faster, more energetic particles), larger <b>surface area</b> (more exposed particles), and a <b>catalyst</b>."],
+        ["eq","catalyst → lowers activation energy → faster (not used up)"],
+        ["key","A catalyst provides an alternative pathway with lower activation energy and is regenerated."]
+      ]}
+    ]
+  },
+  {
+    id:"organic", name:"Intro to Organic", emoji:"🛢️", color:"#8bd3ff",
+    blurb:"Hydrocarbons, alkanes, alkenes and functional groups.",
+    lessons:[
+      {t:"Hydrocarbons & Alkanes", body:[
+        ["p","<b>Organic chemistry</b> is the chemistry of carbon compounds. <b>Hydrocarbons</b> contain only carbon and hydrogen. <b>Alkanes</b> are saturated (only single bonds)."],
+        ["eq","general formula: CₙH₂ₙ₊₂   (methane CH₄, ethane C₂H₆)"],
+        ["key","Alkanes are fairly unreactive but burn well — they're our main fuels."]
+      ]},
+      {t:"Alkenes & Functional Groups", body:[
+        ["p","<b>Alkenes</b> are unsaturated — they contain a C=C double bond, making them reactive."],
+        ["eq","general formula: CₙH₂ₙ   (ethene C₂H₄)"],
+        ["p","Alkenes decolourise bromine water — a key test that distinguishes them from alkanes."],
+        ["key","A <b>functional group</b> is the reactive part of a molecule that gives a family its characteristic reactions."]
+      ]}
+    ]
+  }
+];
+
+const QUIZZES = {
+  atomic:[
+    {q:"How many neutrons are in ²³₁₁Na?",o:["11","12","23","34"],a:1},
+    {q:"What defines which element an atom is?",o:["Number of neutrons","Number of electrons","Number of protons","Mass number"],a:2},
+    {q:"Isotopes of an element differ in their number of…",o:["Protons","Electrons","Neutrons","Charge"],a:2},
+    {q:"The electron configuration of sodium (11 electrons) is:",o:["2,8,1","2,9","8,3","2,8,8"],a:0},
+    {q:"Why is chlorine's relative atomic mass 35.5?",o:["It has 35.5 protons","Weighted average of isotopes","Measurement error","It gains half an electron"],a:1}
+  ],
+  bonding:[
+    {q:"Ionic bonding occurs between…",o:["Two metals","Two non-metals","A metal and a non-metal","Noble gases"],a:2},
+    {q:"In covalent bonding, electrons are…",o:["Transferred","Shared","Destroyed","Delocalised across the whole solid"],a:1},
+    {q:"Why do metals conduct electricity?",o:["Fixed electrons","Delocalised electrons","They contain ions only","High melting point"],a:1},
+    {q:"Ionic compounds conduct electricity when…",o:["Solid","Molten or dissolved","Never","Only when cold"],a:1},
+    {q:"A nitrogen molecule (N₂) contains a…",o:["Single bond","Double bond","Triple bond","Ionic bond"],a:2}
+  ],
+  mole:[
+    {q:"How many particles are in one mole?",o:["6.02×10²³","3.14×10²³","1.60×10⁻¹⁹","1000"],a:0},
+    {q:"Moles = mass ÷ …",o:["Volume","Molar mass","Concentration","Avogadro's number"],a:1},
+    {q:"How many moles in 36 g of water (Mr 18)?",o:["0.5","1","2","18"],a:2},
+    {q:"25 cm³ of 0.10 mol dm⁻³ HCl contains how many moles?",o:["0.10","0.0025","2.5","0.025"],a:1},
+    {q:"Mole ratios come from…",o:["Small subscripts","Balancing numbers","Atomic masses","The pH"],a:1}
+  ],
+  acids:[
+    {q:"An acid releases which ion in water?",o:["OH⁻","H⁺","Na⁺","Cl⁻"],a:1},
+    {q:"A neutral solution has a pH of…",o:["0","7","14","1"],a:1},
+    {q:"Acid + carbonate produces salt, water and…",o:["Hydrogen","Oxygen","Carbon dioxide","Chlorine"],a:2},
+    {q:"The salt made from sulfuric acid is a…",o:["Chloride","Nitrate","Sulfate","Carbonate"],a:2},
+    {q:"In a titration, concordant titres agree within…",o:["1.0 cm³","0.10 cm³","5.0 cm³","exactly 0"],a:1}
+  ],
+  rates:[
+    {q:"Reactions occur when particles collide with enough…",o:["Mass","Activation energy","Charge","Volume"],a:1},
+    {q:"Increasing temperature increases rate because particles…",o:["Get bigger","Move faster & collide harder","Lose charge","Stop moving"],a:1},
+    {q:"A catalyst works by…",o:["Being used up","Raising activation energy","Lowering activation energy","Adding heat"],a:2},
+    {q:"Which increases surface area of a solid reactant?",o:["Using a lump","Powdering it","Cooling it","Diluting it"],a:1},
+    {q:"Higher concentration increases rate because…",o:["Particles are bigger","More frequent collisions","Higher activation energy","Less energy needed"],a:1}
+  ],
+  organic:[
+    {q:"Hydrocarbons contain only…",o:["C and O","C and H","H and O","C, H and N"],a:1},
+    {q:"The general formula of alkanes is…",o:["CₙH₂ₙ","CₙH₂ₙ₊₂","CₙHₙ","CₙH₂ₙ₋₂"],a:1},
+    {q:"Alkenes contain a…",o:["C–C single bond","C=C double bond","Triple bond","Ionic bond"],a:1},
+    {q:"Which test distinguishes alkenes from alkanes?",o:["Flame colour","Decolourising bromine water","pH paper","Limewater"],a:1},
+    {q:"The reactive part of an organic molecule is the…",o:["Backbone","Functional group","Nucleus","Isotope"],a:1}
+  ]
+};
+
+// compact periodic table data: symbol, name, number, group(1-18), period, mass, category
+const ELEMENTS = [
+  ["H","Hydrogen",1,1,1,1.008,"nonmetal"],["He","Helium",2,18,1,4.003,"noble"],
+  ["Li","Lithium",3,1,2,6.94,"alkali"],["Be","Beryllium",4,2,2,9.012,"alkaline"],
+  ["B","Boron",5,13,2,10.81,"metalloid"],["C","Carbon",6,14,2,12.011,"nonmetal"],
+  ["N","Nitrogen",7,15,2,14.007,"nonmetal"],["O","Oxygen",8,16,2,15.999,"nonmetal"],
+  ["F","Fluorine",9,17,2,18.998,"halogen"],["Ne","Neon",10,18,2,20.18,"noble"],
+  ["Na","Sodium",11,1,3,22.99,"alkali"],["Mg","Magnesium",12,2,3,24.305,"alkaline"],
+  ["Al","Aluminium",13,13,3,26.982,"postt"],["Si","Silicon",14,14,3,28.085,"metalloid"],
+  ["P","Phosphorus",15,15,3,30.974,"nonmetal"],["S","Sulfur",16,16,3,32.06,"nonmetal"],
+  ["Cl","Chlorine",17,17,3,35.45,"halogen"],["Ar","Argon",18,18,3,39.948,"noble"],
+  ["K","Potassium",19,1,4,39.098,"alkali"],["Ca","Calcium",20,2,4,40.078,"alkaline"],
+  ["Sc","Scandium",21,3,4,44.956,"transition"],["Ti","Titanium",22,4,4,47.867,"transition"],
+  ["V","Vanadium",23,5,4,50.942,"transition"],["Cr","Chromium",24,6,4,51.996,"transition"],
+  ["Mn","Manganese",25,7,4,54.938,"transition"],["Fe","Iron",26,8,4,55.845,"transition"],
+  ["Co","Cobalt",27,9,4,58.933,"transition"],["Ni","Nickel",28,10,4,58.693,"transition"],
+  ["Cu","Copper",29,11,4,63.546,"transition"],["Zn","Zinc",30,12,4,65.38,"transition"],
+  ["Ga","Gallium",31,13,4,69.723,"postt"],["Ge","Germanium",32,14,4,72.63,"metalloid"],
+  ["As","Arsenic",33,15,4,74.922,"metalloid"],["Se","Selenium",34,16,4,78.971,"nonmetal"],
+  ["Br","Bromine",35,17,4,79.904,"halogen"],["Kr","Krypton",36,18,4,83.798,"noble"],
+  ["Rb","Rubidium",37,1,5,85.468,"alkali"],["Sr","Strontium",38,2,5,87.62,"alkaline"],
+  ["Y","Yttrium",39,3,5,88.906,"transition"],["Zr","Zirconium",40,4,5,91.224,"transition"],
+  ["Nb","Niobium",41,5,5,92.906,"transition"],["Mo","Molybdenum",42,6,5,95.95,"transition"],
+  ["Tc","Technetium",43,7,5,98,"transition"],["Ru","Ruthenium",44,8,5,101.07,"transition"],
+  ["Rh","Rhodium",45,9,5,102.91,"transition"],["Pd","Palladium",46,10,5,106.42,"transition"],
+  ["Ag","Silver",47,11,5,107.87,"transition"],["Cd","Cadmium",48,12,5,112.41,"transition"],
+  ["In","Indium",49,13,5,114.82,"postt"],["Sn","Tin",50,14,5,118.71,"postt"],
+  ["Sb","Antimony",51,15,5,121.76,"metalloid"],["Te","Tellurium",52,16,5,127.6,"metalloid"],
+  ["I","Iodine",53,17,5,126.9,"halogen"],["Xe","Xenon",54,18,5,131.29,"noble"],
+  ["Cs","Caesium",55,1,6,132.91,"alkali"],["Ba","Barium",56,2,6,137.33,"alkaline"],
+  ["La","Lanthanum",57,3,6,138.91,"lan"],["Hf","Hafnium",72,4,6,178.49,"transition"],
+  ["Ta","Tantalum",73,5,6,180.95,"transition"],["W","Tungsten",74,6,6,183.84,"transition"],
+  ["Re","Rhenium",75,7,6,186.21,"transition"],["Os","Osmium",76,8,6,190.23,"transition"],
+  ["Ir","Iridium",77,9,6,192.22,"transition"],["Pt","Platinum",78,10,6,195.08,"transition"],
+  ["Au","Gold",79,11,6,196.97,"transition"],["Hg","Mercury",80,12,6,200.59,"transition"],
+  ["Tl","Thallium",81,13,6,204.38,"postt"],["Pb","Lead",82,14,6,207.2,"postt"],
+  ["Bi","Bismuth",83,15,6,208.98,"postt"],["Po","Polonium",84,16,6,209,"metalloid"],
+  ["At","Astatine",85,17,6,210,"halogen"],["Rn","Radon",86,18,6,222,"noble"],
+  ["Cs2","",0,0,0,0,""], // placeholder guard (unused)
+  ["Fr","Francium",87,1,7,223,"alkali"],["Ra","Radium",88,2,7,226,"alkaline"],
+  ["Ac","Actinium",89,3,7,227,"act"],["Rf","Rutherfordium",104,4,7,267,"transition"],
+  ["Db","Dubnium",105,5,7,268,"transition"],["Sg","Seaborgium",106,6,7,269,"transition"],
+  ["Bh","Bohrium",107,7,7,270,"transition"],["Hs","Hassium",108,8,7,269,"transition"],
+  ["Mt","Meitnerium",109,9,7,278,"transition"],["Ds","Darmstadtium",110,10,7,281,"transition"],
+  ["Rg","Roentgenium",111,11,7,282,"transition"],["Cn","Copernicium",112,12,7,285,"transition"],
+  ["Nh","Nihonium",113,13,7,286,"postt"],["Fl","Flerovium",114,14,7,289,"postt"],
+  ["Mc","Moscovium",115,15,7,290,"postt"],["Lv","Livermorium",116,16,7,293,"postt"],
+  ["Ts","Tennessine",117,17,7,294,"halogen"],["Og","Oganesson",118,18,7,294,"noble"]
+].filter(e=>e[3]>0);
+
+const CAT_NAMES={nonmetal:"Non-metal",noble:"Noble gas",alkali:"Alkali metal",alkaline:"Alkaline earth",metalloid:"Metalloid",halogen:"Halogen",transition:"Transition metal",postt:"Post-transition",lan:"Lanthanide",act:"Actinide"};
+
+const RESOURCES=[
+  ["📄","2025 Final Exam — Paper 1 (MCQ)","Full past paper with mark scheme · PDF"],
+  ["📄","2025 Final Exam — Paper 2 (Structured)","Long-answer questions + worked solutions · PDF"],
+  ["📊","Formula & Equations Cheat-Sheet","One-page reference for moles, concentration & rates"],
+  ["🧾","Ion Charges Reference Table","Common cations, anions and polyatomic ions"],
+  ["🎥","Titration Technique (video)","12-min walkthrough of a full titration"],
+  ["📘","Organic Chemistry Starter Notes","Alkanes, alkenes, naming and functional groups"]
+];
+
+/* =================================================================
+   STATE  (persisted)
+==================================================================*/
+const KEY="chemlab_v1";
+let S = load();
+function load(){
+  try{return JSON.parse(localStorage.getItem(KEY))||fresh();}catch(e){return fresh();}
+}
+function fresh(){return {user:null, done:{}, quiz:{}, history:[]};}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+
+/* =================================================================
+   AUTH
+==================================================================*/
+function login(){
+  const name=document.getElementById("in-name").value.trim()||"Student";
+  const level=document.getElementById("in-level").value;
+  S.user={name,level};
+  save();
+  boot();
+}
+function logout(){ S.user=null; save(); location.reload(); }
+function boot(){
+  if(!S.user) return;
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").classList.add("on");
+  const fn=S.user.name.split(" ")[0];
+  document.getElementById("who-name").textContent=S.user.name;
+  document.getElementById("who-level").textContent=S.user.level;
+  document.getElementById("av").textContent=(S.user.name[0]||"S").toUpperCase();
+  const h=new Date().getHours();
+  const g=h<12?"Good morning":h<17?"Good afternoon":"Good evening";
+  document.getElementById("greet").textContent=`${g}, ${fn}`;
+  renderAll();
+}
+
+/* =================================================================
+   NAV
+==================================================================*/
+document.querySelectorAll(".nav-item").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    const v=b.dataset.view;
+    document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
+    document.getElementById("v-"+v).classList.add("on");
+    // reset drill-downs
+    document.getElementById("lesson-detail").style.display="none";
+    document.getElementById("topics-list").style.display="";
+    document.getElementById("quiz-run").style.display="none";
+    document.getElementById("quiz-list").style.display="";
+    toggleMenu(false);
+    window.scrollTo(0,0);
+  });
+});
+function toggleMenu(open){
+  const s=document.getElementById("side"), sc=document.querySelector(".scrim");
+  if(open){s.classList.add("open");sc.classList.add("on");}
+  else{s.classList.remove("open");sc.classList.remove("on");}
+}
+
+/* =================================================================
+   RENDER
+==================================================================*/
+function topicProgress(t){
+  const d=S.done[t.id]||[];
+  return Math.round(d.length/t.lessons.length*100);
+}
+function renderAll(){
+  renderDash(); renderTopics(); renderQuizList(); renderPTable(); renderResources(); renderProgress();
+}
+
+function renderDash(){
+  // overall lessons %
+  let total=0,done=0;
+  TOPICS.forEach(t=>{total+=t.lessons.length; done+=(S.done[t.id]||[]).length;});
+  const pct=total?Math.round(done/total*100):0;
+  const ring=document.getElementById("ring-lessons");
+  ring.style.setProperty("--p",pct);
+  ring.querySelector("span").textContent=pct+"%";
+
+  // avg quiz
+  const scores=Object.values(S.quiz);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b.pct,0)/scores.length):null;
+  document.getElementById("avg-score").textContent=avg!==null?avg+"%":"—";
+  document.getElementById("quiz-count").textContent=scores.length?`${scores.length} quiz${scores.length>1?"zes":""} completed`:"No quizzes taken yet";
+
+  // mastered
+  let m=0;
+  TOPICS.forEach(t=>{ if(topicProgress(t)===100 && (S.quiz[t.id]?.pct||0)>=70) m++; });
+  document.getElementById("mastered").innerHTML=m+'<span style="font-size:16px;color:var(--faint)">/6</span>';
+
+  document.getElementById("streak").textContent=S.history.length?Math.min(S.history.length,7):1;
+
+  // continue cards = 3 least-progressed topics
+  const sorted=[...TOPICS].sort((a,b)=>topicProgress(a)-topicProgress(b)).slice(0,3);
+  document.getElementById("continue-cards").innerHTML=sorted.map(t=>{
+    const p=topicProgress(t);
+    return `<div class="card hover topic" onclick="openTopicFromDash('${t.id}')">
+      <div class="emoji">${t.emoji}</div>
+      <h3 style="margin-top:8px">${t.name}</h3>
+      <small>${p}% complete · ${t.lessons.length} lessons</small>
+      <div class="bar"><i style="width:${p}%"></i></div>
+    </div>`;
+  }).join("");
+}
+function openTopicFromDash(id){
+  document.querySelector('.nav-item[data-view="lessons"]').click();
+  openTopic(id);
+}
+
+function renderTopics(){
+  document.getElementById("topics-list").innerHTML=TOPICS.map(t=>{
+    const p=topicProgress(t);
+    const q=S.quiz[t.id];
+    return `<div class="card hover topic" onclick="openTopic('${t.id}')">
+      <span class="tag">${t.lessons.length} lessons</span>
+      <div class="emoji">${t.emoji}</div>
+      <h3 style="margin-top:10px">${t.name}</h3>
+      <div class="muted" style="font-size:13px">${t.blurb}</div>
+      <div class="bar"><i style="width:${p}%"></i></div>
+      <div class="chips">
+        <span class="chip ${p===100?'badge-done':'badge-todo'}">${p}% lessons</span>
+        ${q?`<span class="chip">Best quiz ${q.pct}%</span>`:`<span class="chip">Quiz not taken</span>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openTopic(id){
+  const t=TOPICS.find(x=>x.id===id);
+  const done=S.done[id]||[];
+  const list=document.getElementById("topics-list");
+  const detail=document.getElementById("lesson-detail");
+  list.style.display="none";
+  detail.style.display="block";
+  detail.innerHTML=`
+    <button class="back" onclick="closeTopic()">← All topics</button>
+    <div class="topbar"><div><h2>${t.emoji} ${t.name}</h2><p>${t.blurb}</p></div></div>
+    <div class="cards" id="lesson-cards"></div>`;
+  document.getElementById("lesson-cards").innerHTML=t.lessons.map((l,i)=>{
+    const isDone=done.includes(i);
+    return `<div class="card">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:34px;height:34px;border-radius:10px;background:var(--panel2);display:grid;place-items:center;font-weight:800;flex:none">${i+1}</div>
+        <div style="flex:1"><b>${l.t}</b></div>
+        <span class="chip ${isDone?'badge-done':''}">${isDone?'✓ Done':'To do'}</span>
+      </div>
+      <button class="dl" style="margin:14px 0 0;width:100%" onclick="openLesson('${id}',${i})">${isDone?'Review lesson':'Start lesson'} →</button>
+    </div>`;
+  }).join("");
+  window.scrollTo(0,0);
+}
+function closeTopic(){
+  document.getElementById("lesson-detail").style.display="none";
+  document.getElementById("topics-list").style.display="";
+  renderTopics();
+}
+
+function openLesson(id,i){
+  const t=TOPICS.find(x=>x.id===id);
+  const l=t.lessons[i];
+  const detail=document.getElementById("lesson-detail");
+  const html=l.body.map(([type,txt])=>{
+    if(type==="p")return `<p>${txt}</p>`;
+    if(type==="h")return `<h4>${txt}</h4>`;
+    if(type==="key")return `<div class="keybox">💡 ${txt}</div>`;
+    if(type==="eq")return `<div class="eq">${txt}</div>`;
+    if(type==="ul")return `<ul>${txt}</ul>`;
+    return "";
+  }).join("");
+  const isDone=(S.done[id]||[]).includes(i);
+  detail.innerHTML=`
+    <button class="back" onclick="openTopic('${id}')">← ${t.name}</button>
+    <div class="reader">
+      <div class="cap" style="color:var(--faint)">${t.name} · Lesson ${i+1} of ${t.lessons.length}</div>
+      <h3>${l.t}</h3>
+      ${html}
+      <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn" style="width:auto;margin:0;padding:12px 22px" onclick="markDone('${id}',${i})">
+          ${isDone?'✓ Completed — mark again':'Mark as complete ✓'}
+        </button>
+        ${i<t.lessons.length-1?`<button class="back" style="margin:0" onclick="openLesson('${id}',${i+1})">Next lesson →</button>`:
+          `<button class="back" style="margin:0" onclick="startQuizNav('${id}')">Take the quiz →</button>`}
+      </div>
+    </div>`;
+  window.scrollTo(0,0);
+}
+function markDone(id,i){
+  S.done[id]=S.done[id]||[];
+  if(!S.done[id].includes(i)) S.done[id].push(i);
+  logActivity("Completed lesson: "+TOPICS.find(t=>t.id===id).lessons[i].t);
+  save();
+  openLesson(id,i);
+  renderDash();
+}
+function startQuizNav(id){
+  document.querySelector('.nav-item[data-view="quiz"]').click();
+  startQuiz(id);
+}
+
+/* ---------- QUIZ ---------- */
+function renderQuizList(){
+  document.getElementById("quiz-list").innerHTML=TOPICS.map(t=>{
+    const q=S.quiz[t.id];
+    return `<div class="card hover">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="emoji">${t.emoji}</div>
+        <div style="flex:1"><b>${t.name}</b><div class="muted" style="font-size:12.5px">${QUIZZES[t.id].length} questions</div></div>
+      </div>
+      ${q?`<div class="chips"><span class="chip badge-done">Best: ${q.pct}% (${q.score}/${q.total})</span></div>`:`<div class="chips"><span class="chip badge-todo">Not attempted</span></div>`}
+      <button class="dl" style="margin:14px 0 0;width:100%" onclick="startQuiz('${t.id}')">${q?'Retake quiz':'Start quiz'} →</button>
+    </div>`;
+  }).join("");
+}
+let QZ=null;
+function startQuiz(id){
+  QZ={id,answers:Array(QUIZZES[id].length).fill(null),submitted:false};
+  document.getElementById("quiz-list").style.display="none";
+  document.getElementById("quiz-run").style.display="block";
+  drawQuiz();
+  window.scrollTo(0,0);
+}
+function drawQuiz(){
+  const t=TOPICS.find(x=>x.id===QZ.id);
+  const qs=QUIZZES[QZ.id];
+  const box=document.getElementById("quiz-run");
+  const answered=QZ.answers.filter(a=>a!==null).length;
+  box.innerHTML=`
+    <button class="back" onclick="exitQuiz()">← All quizzes</button>
+    <div class="topbar"><div><h2>${t.emoji} ${t.name} Quiz</h2><p>${answered}/${qs.length} answered</p></div></div>
+    ${qs.map((qq,qi)=>`
+      <div class="card q">
+        <div class="stem">${qi+1}. ${qq.q}</div>
+        ${qq.o.map((op,oi)=>{
+          let cls="opt";
+          if(QZ.answers[qi]===oi)cls+=" sel";
+          if(QZ.submitted){
+            if(oi===qq.a)cls+=" correct";
+            else if(QZ.answers[qi]===oi)cls+=" wrong";
+          }
+          return `<div class="${cls}" onclick="${QZ.submitted?'':`pick(${qi},${oi})`}">
+            <div class="k">${String.fromCharCode(65+oi)}</div><div>${op}</div>
+          </div>`;
+        }).join("")}
+      </div>`).join("")}
+    ${QZ.submitted?renderQuizResult():`
+      <button class="btn" style="max-width:220px" onclick="submitQuiz()">Submit answers</button>`}
+  `;
+}
+function pick(qi,oi){ QZ.answers[qi]=oi; drawQuiz(); }
+function submitQuiz(){
+  if(QZ.answers.includes(null)){
+    if(!confirm("You have unanswered questions. Submit anyway?"))return;
+  }
+  QZ.submitted=true;
+  const qs=QUIZZES[QZ.id];
+  let score=0; qs.forEach((qq,i)=>{if(QZ.answers[i]===qq.a)score++;});
+  const pct=Math.round(score/qs.length*100);
+  const prev=S.quiz[QZ.id];
+  if(!prev || pct>=prev.pct) S.quiz[QZ.id]={score,total:qs.length,pct};
+  S.history.unshift({topic:TOPICS.find(t=>t.id===QZ.id).name,score,total:qs.length,pct,ts:friendlyNow()});
+  logActivity("");
+  save();
+  drawQuiz();
+  renderDash();renderProgress();renderQuizList();
+}
+function renderQuizResult(){
+  const qs=QUIZZES[QZ.id];
+  let score=0; qs.forEach((qq,i)=>{if(QZ.answers[i]===qq.a)score++;});
+  const pct=Math.round(score/qs.length*100);
+  const msg=pct>=80?"Excellent work! 🎉":pct>=60?"Good effort — review the misses.":"Keep practising — revisit the lesson.";
+  return `<div class="card quiz-result">
+    <div class="big">${pct}%</div>
+    <div style="font-size:16px;font-weight:700;margin:6px 0">${score} / ${qs.length} correct</div>
+    <div class="muted">${msg}</div>
+    <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" style="width:auto;margin:0;padding:11px 20px" onclick="startQuiz('${QZ.id}')">Retake</button>
+      <button class="back" style="margin:0" onclick="exitQuiz()">Back to quizzes</button>
+    </div>
+  </div>`;
+}
+function exitQuiz(){
+  document.getElementById("quiz-run").style.display="none";
+  document.getElementById("quiz-list").style.display="";
+  QZ=null; renderQuizList();
+}
+
+/* ---------- PERIODIC TABLE ---------- */
+function renderPTable(){
+  const g=document.getElementById("ptable");
+  // build 7 rows x 18 cols grid; lanthanide/actinide simplified (La/Ac shown in main table)
+  const cells={};
+  ELEMENTS.forEach(e=>{ cells[e[4]+"-"+e[3]]=e; });
+  let html="";
+  for(let p=1;p<=7;p++){
+    for(let grp=1;grp<=18;grp++){
+      const e=cells[p+"-"+grp];
+      if(e){
+        html+=`<div class="el ${e[6]}" onclick='showEl(${JSON.stringify(e)})'>
+          <div class="no">${e[2]}</div>
+          <div class="sym">${e[0]}</div>
+          <div class="nm">${e[1]}</div>
+        </div>`;
+      } else {
+        // leave gaps except where nothing belongs
+        html+=`<div style="visibility:hidden"></div>`;
+      }
+    }
+  }
+  g.innerHTML=html;
+  document.getElementById("legend").innerHTML=Object.keys(CAT_NAMES).map(c=>{
+    const bg={nonmetal:"#173a34",noble:"#2a2350",alkali:"#3a1d1d",alkaline:"#3a2a17",metalloid:"#173047",halogen:"#1d3a2c",transition:"#252b46",postt:"#24304a",lan:"#331d3a",act:"#3a1d2e"}[c];
+    return `<span><i style="background:${bg}"></i>${CAT_NAMES[c]}</span>`;
+  }).join("");
+}
+function showEl(e){
+  const [sym,name,no,grp,per,mass,cat]=e;
+  document.getElementById("modal").innerHTML=`
+    <div class="elhead">
+      <div>
+        <div class="no" style="color:var(--faint);font-size:12px">${no}</div>
+        <div class="big-sym">${sym}</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px">${name}</div>
+      </div>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
+    <div style="margin-top:16px">
+      <div class="kv"><span>Atomic number</span><b>${no}</b></div>
+      <div class="kv"><span>Relative atomic mass</span><b>${mass}</b></div>
+      <div class="kv"><span>Group</span><b>${grp>2&&grp<13?'(transition block)':grp}</b></div>
+      <div class="kv"><span>Period</span><b>${per}</b></div>
+      <div class="kv" style="border:none"><span>Category</span><b>${CAT_NAMES[cat]||"—"}</b></div>
+    </div>`;
+  document.getElementById("modal-bg").classList.add("on");
+}
+function closeModal(){document.getElementById("modal-bg").classList.remove("on");}
+
+/* ---------- RESOURCES ---------- */
+function renderResources(){
+  document.getElementById("res-list").innerHTML=RESOURCES.map(r=>`
+    <div class="card res">
+      <div class="ic">${r[0]}</div>
+      <div><b>${r[1]}</b><br><small>${r[2]}</small></div>
+      <button class="dl" onclick="alert('Demo: this would download “${r[1]}”.')">Open</button>
+    </div>`).join("");
+}
+
+/* ---------- PROGRESS ---------- */
+function renderProgress(){
+  document.getElementById("prog-topics").innerHTML=TOPICS.map(t=>{
+    const p=topicProgress(t);
+    const q=S.quiz[t.id];
+    return `<div style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>${t.emoji} ${t.name}</b>
+        <span class="muted" style="font-size:12.5px">${p}% lessons ${q?`· quiz ${q.pct}%`:'· no quiz'}</span>
+      </div>
+      <div class="pbar"><i style="width:${p}%"></i></div>
+    </div>`;
+  }).join("");
+  const h=document.getElementById("quiz-history");
+  h.innerHTML=S.history.length?S.history.slice(0,12).map(x=>`
+    <div class="lesson-row">
+      <div class="dot" style="background:${x.pct>=70?'var(--green)':'var(--amber)'};box-shadow:0 0 10px ${x.pct>=70?'var(--green)':'var(--amber)'}"></div>
+      <div style="flex:1"><b>${x.topic} Quiz</b><div class="muted" style="font-size:12px">${x.ts}</div></div>
+      <b style="color:${x.pct>=70?'var(--green)':'var(--amber)'}">${x.score}/${x.total} · ${x.pct}%</b>
+    </div>`).join(""):'<div class="empty">No quizzes yet — head to the Quizzes tab to start.</div>';
+}
+function resetProgress(){
+  if(!confirm("Reset all lessons and quiz progress? This can't be undone."))return;
+  const u=S.user; S=fresh(); S.user=u; save(); renderAll();
+}
+
+/* ---------- helpers ---------- */
+function friendlyNow(){
+  const d=new Date();
+  return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+}
+function logActivity(){ /* streak proxy */ const today=new Date().toDateString(); if(!S._last||S._last!==today){S._last=today;} }
+
+/* ---------- init ---------- */
+if(S.user){ boot(); }
+document.getElementById("in-name").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+</script>
+</body>
+</html>
